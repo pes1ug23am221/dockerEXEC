@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Runtime data (generated at runtime, never committed)
+data/access_codes.json
+data/queue.db
+data/queue.db-shm
+data/queue.db-wal
+
+# Job workspaces (user uploads, container output — can be huge)
+jobs/*/
+
+# Keep the jobs/ directory itself
+!jobs/.gitkeep
+
+# Pytest
+.pytest_cache/
+*.pytest_cache
+
+# Node (sample only — do not commit node_modules)
+samples/nodejs_sample/node_modules/
+samples/nodejs_sample/package-lock.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo

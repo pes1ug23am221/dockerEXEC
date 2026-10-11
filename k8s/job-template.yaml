@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: py-job-${JOB_ID}
+  labels:
+    job-group: distributed-executor
+spec:
+  ttlSecondsAfterFinished: 600
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        app: py-job-worker
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: job-runner
+        image: executor-base:latest
+        imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            cpu: "1"
+            memory: "1Gi"
+          limits:
+            cpu: "2"
+            memory: "2Gi"
+        command: ["bash", "-c"]
+        args:
+        - |
+          set -e
+          if [ -f /workspace/requirements.txt ]; then
+            pip install --no-cache-dir -r /workspace/requirements.txt
+          fi
+          bash /workspace/run.sh
+        volumeMounts:
+        - name: workspace-volume
+          mountPath: /workspace
+      volumes:
+      - name: workspace-volume
+        persistentVolumeClaim:
+          claimName: job-workspace-pvc

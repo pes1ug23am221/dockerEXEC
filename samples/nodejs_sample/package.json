@@ -1,0 +1,9 @@
+{
+  "name": "nodejs-stats-sample",
+  "version": "1.0.0",
+  "description": "Statistics sample using simple-statistics",
+  "main": "main.js",
+  "dependencies": {
+    "simple-statistics": "^7.8.3"
+  }
+}

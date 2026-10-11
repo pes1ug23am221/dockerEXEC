@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: containerized-executor-server
+  labels:
+    app: containerized-executor
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: containerized-executor
+  template:
+    metadata:
+      labels:
+        app: containerized-executor
+    spec:
+      containers:
+      - name: executor-api
+        image: executor-server:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8000
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "512Mi"
+          limits:
+            cpu: "2"
+            memory: "4Gi"
+        volumeMounts:
+        - name: docker-sock
+          mountPath: /var/run/docker.sock
+        - name: jobs-storage
+          mountPath: /app/jobs
+      volumes:
+      - name: docker-sock
+        hostPath:
+          path: /var/run/docker.sock
+      - name: jobs-storage
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: containerized-executor-service
+spec:
+  type: NodePort
+  selector:
+    app: containerized-executor
+  ports:
+  - port: 8000
+    targetPort: 8000
+    nodePort: 30080

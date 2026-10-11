@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Portal - Access Code Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090c10;
+      --surface: #0d1117;
+      --surface-raised: #161b22;
+      --border: #21262d;
+      --border-focus: #388bfd;
+      --text-main: #c9d1d9;
+      --text-bright: #f0f6fc;
+      --text-muted: #8b949e;
+      --accent: #238636;
+      --accent-hover: #2ea043;
+      --blue: #1f6feb;
+      --blue-hover: #388bfd;
+      --danger: #f85149;
+      --warning: #d29922;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    header {
+      background-color: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text-bright);
+      letter-spacing: -0.01em;
+    }
+
+    .brand-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.15rem;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .live-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background: var(--surface-raised);
+      padding: 0.3rem 0.65rem;
+      border-radius: 9999px;
+      border: 1px solid var(--border);
+    }
+
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      background-color: var(--accent);
+      border-radius: 50%;
+      box-shadow: 0 0 6px var(--accent);
+    }
+
+    .nav-link {
+      font-size: 0.825rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      border: 1px solid var(--border);
+      padding: 0.45rem 0.85rem;
+      border-radius: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .nav-link:hover {
+      color: var(--text-bright);
+      background-color: var(--surface-raised);
+      border-color: #8b949e;
+    }
+
+    main {
+      flex: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+    }
+
+    .card {
+      background-color: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.75rem;
+    }
+
+    .card-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-bright);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    /* Generator form */
+    .generator-grid {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 1rem;
+      align-items: end;
+    }
+
+    @media (max-width: 700px) {
+      .generator-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .form-label {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-bright);
+    }
+
+    .input-text {
+      background-color: var(--surface-raised);
+      border: 1px solid var(--border);
+      color: var(--text-bright);
+      font-family: inherit;
+      font-size: 0.875rem;
+      padding: 0.65rem 0.85rem;
+      border-radius: 6px;
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+
+    .input-text:focus {
+      border-color: var(--border-focus);
+    }
+
+    .btn {
+      font-family: inherit;
+      font-size: 0.875rem;
+      font-weight: 500;
+      padding: 0.65rem 1.25rem;
+      border-radius: 6px;
+      border: 1px solid rgba(240, 246, 252, 0.1);
+      cursor: pointer;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background-color: var(--accent);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--accent-hover);
+    }
+
+    .btn-secondary {
+      background-color: var(--surface-raised);
+      color: var(--text-bright);
+      border-color: var(--border);
+    }
+
+    .btn-secondary:hover {
+      background-color: #21262d;
+      border-color: #8b949e;
+    }
+
+    .btn-sm {
+      padding: 0.3rem 0.6rem;
+      font-size: 0.75rem;
+    }
+
+    .btn-danger {
+      background-color: transparent;
+      color: var(--danger);
+      border-color: rgba(248, 81, 73, 0.3);
+    }
+
+    .btn-danger:hover {
+      background-color: rgba(248, 81, 73, 0.1);
+      border-color: var(--danger);
+    }
+
+    /* Generated code highlight display */
+    .generated-box {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-focus);
+      border-radius: 6px;
+      padding: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .code-display {
+      font-family: 'Fira Code', monospace;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #58a6ff;
+      letter-spacing: 0.05em;
+    }
+
+    .code-meta {
+      font-size: 0.775rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+
+    /* Table controls & Filters */
+    .table-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 0.35rem;
+      background: var(--surface-raised);
+      padding: 0.25rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+
+    .filter-tab {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 0.35rem 0.75rem;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.15s ease;
+    }
+
+    .filter-tab:hover {
+      color: var(--text-bright);
+    }
+
+    .filter-tab.active {
+      background: #21262d;
+      color: var(--text-bright);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+
+    .tab-count {
+      font-size: 0.7rem;
+      padding: 0.1rem 0.35rem;
+      border-radius: 9999px;
+      background: rgba(255,255,255,0.08);
+      color: inherit;
+    }
+
+    .search-input {
+      max-width: 280px;
+      width: 100%;
+    }
+
+    .table-wrapper {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.825rem;
+      text-align: left;
+    }
+
+    th {
+      background-color: var(--surface-raised);
+      color: var(--text-muted);
+      font-weight: 500;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-main);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background-color: rgba(255, 255, 255, 0.015);
+    }
+
+    .code-cell {
+      font-family: 'Fira Code', monospace;
+      color: var(--text-bright);
+      font-weight: 500;
+    }
+
+    .status-badge {
+      font-size: 0.7rem;
+      font-weight: 500;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      display: inline-block;
+    }
+
+    .status-unused {
+      background: rgba(35, 134, 54, 0.15);
+      color: #3fb950;
+      border: 1px solid rgba(35, 134, 54, 0.3);
+    }
+
+    .status-used {
+      background: rgba(139, 148, 158, 0.15);
+      color: #8b949e;
+      border: 1px solid rgba(139, 148, 158, 0.3);
+    }
+
+    .status-revoked {
+      background: rgba(248, 81, 73, 0.15);
+      color: #f85149;
+      border: 1px solid rgba(248, 81, 73, 0.3);
+    }
+
+    .actions-cell {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <div class="brand-title">Admin Portal</div>
+      <div class="brand-subtitle">One-Time Access Code Generator & Live Directory</div>
+    </div>
+    <div class="header-right">
+      <div class="live-indicator">
+        <span class="live-dot"></span>
+        <span id="syncText">Live Sync</span>
+      </div>
+      <a href="/" class="nav-link">Job Execution Dashboard</a>
+    </div>
+  </header>
+
+  <main>
+    <!-- Generator Section -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Generate One-Time Code</span>
+        <span style="font-size: 0.75rem; color: var(--text-muted);">Single-Use Tokens</span>
+      </div>
+
+      <div class="generator-grid">
+        <div class="form-group">
+          <label for="noteInput" class="form-label">Note / Recipient Reference (Optional)</label>
+          <input type="text" id="noteInput" class="input-text" placeholder="e.g. For User Alice / Project Benchmarks">
+        </div>
+        <button id="btnGenerate" class="btn btn-primary">
+          Generate Access Code
+        </button>
+      </div>
+
+      <!-- Generated Code Display -->
+      <div id="generatedBox" class="generated-box hidden">
+        <div>
+          <div class="code-display" id="newCodeValue">ACC-XXXX-XXXX</div>
+          <div class="code-meta" id="newCodeMeta">Single-use token generated. Share this with the user.</div>
+        </div>
+        <button id="btnCopy" class="btn btn-secondary">
+          Copy Code
+        </button>
+      </div>
+    </div>
+
+    <!-- Codes Table Section -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Access Codes Directory</span>
+        <span id="codesCount" style="font-size: 0.75rem; color: var(--text-muted);">0 codes</span>
+      </div>
+
+      <div class="table-controls">
+        <!-- Status Filter Tabs -->
+        <div class="filter-tabs" id="filterTabs">
+          <button class="filter-tab active" data-filter="all">
+            All <span class="tab-count" id="countAll">0</span>
+          </button>
+          <button class="filter-tab" data-filter="unused">
+            Unused <span class="tab-count" id="countUnused">0</span>
+          </button>
+          <button class="filter-tab" data-filter="used">
+            Used <span class="tab-count" id="countUsed">0</span>
+          </button>
+          <button class="filter-tab" data-filter="revoked">
+            Revoked <span class="tab-count" id="countRevoked">0</span>
+          </button>
+        </div>
+
+        <!-- Search Box -->
+        <input type="text" id="searchFilter" class="input-text search-input" placeholder="Search by code or note...">
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Access Code</th>
+              <th>Status</th>
+              <th>Created At</th>
+              <th>Used By Job</th>
+              <th>Note</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="codesTableBody">
+            <tr>
+              <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">Loading access codes...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const noteInput = document.getElementById('noteInput');
+    const btnGenerate = document.getElementById('btnGenerate');
+    const generatedBox = document.getElementById('generatedBox');
+    const newCodeValue = document.getElementById('newCodeValue');
+    const newCodeMeta = document.getElementById('newCodeMeta');
+    const btnCopy = document.getElementById('btnCopy');
+    const codesTableBody = document.getElementById('codesTableBody');
+    const codesCount = document.getElementById('codesCount');
+    const searchFilter = document.getElementById('searchFilter');
+    const filterTabs = document.getElementById('filterTabs');
+    const countAll = document.getElementById('countAll');
+    const countUnused = document.getElementById('countUnused');
+    const countUsed = document.getElementById('countUsed');
+    const countRevoked = document.getElementById('countRevoked');
+    const syncText = document.getElementById('syncText');
+
+    let allCodes = [];
+    let currentFilter = 'all';
+
+    // Fetch codes from API
+    async function loadCodes() {
+      try {
+        const res = await fetch('/api/admin/codes');
+        if (!res.ok) throw new Error('Failed to fetch codes');
+        const data = await res.json();
+        // Sort newest first
+        data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+        allCodes = data;
+        updateCounts();
+        renderTable();
+      } catch (err) {
+        codesTableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--danger); padding: 2rem;">Error loading codes: ${err.message}</td></tr>`;
+      }
+    }
+
+    function updateCounts() {
+      const unusedCount = allCodes.filter(c => c.status === 'unused').length;
+      const usedCount = allCodes.filter(c => c.status === 'used').length;
+      const revokedCount = allCodes.filter(c => c.status === 'revoked').length;
+
+      countAll.textContent = allCodes.length;
+      countUnused.textContent = unusedCount;
+      countUsed.textContent = usedCount;
+      countRevoked.textContent = revokedCount;
+    }
+
+    function renderTable() {
+      const query = searchFilter.value.trim().toLowerCase();
+
+      const filtered = allCodes.filter(c => {
+        // Status filter
+        if (currentFilter !== 'all' && c.status !== currentFilter) {
+          return false;
+        }
+        // Text query
+        if (query) {
+          const matches = c.code.toLowerCase().includes(query) || (c.note && c.note.toLowerCase().includes(query));
+          if (!matches) return false;
+        }
+        return true;
+      });
+
+      codesCount.textContent = `Showing ${filtered.length} of ${allCodes.length} codes`;
+
+      if (filtered.length === 0) {
+        codesTableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">No matching ${currentFilter !== 'all' ? currentFilter : ''} codes found.</td></tr>`;
+        return;
+      }
+
+      codesTableBody.innerHTML = filtered.map(c => {
+        const statusClass = c.status === 'unused' ? 'status-unused' : (c.status === 'used' ? 'status-used' : 'status-revoked');
+        const statusLabel = c.status.toUpperCase();
+        const createdDate = c.created_at ? new Date(c.created_at).toLocaleString() : '-';
+        const usedBy = c.used_by_job ? `<span style="font-family: 'Fira Code', monospace; color: var(--text-bright);">${c.used_by_job}</span>` : '<span style="color: var(--text-muted);">-</span>';
+        const note = c.note || '-';
+
+        return `
+          <tr>
+            <td class="code-cell">${c.code}</td>
+            <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
+            <td>${createdDate}</td>
+            <td>${usedBy}</td>
+            <td>${note}</td>
+            <td>
+              <div class="actions-cell">
+                <button class="btn btn-secondary btn-sm" onclick="copyText('${c.code}', this)">Copy</button>
+                ${c.status === 'unused' ? `<button class="btn btn-danger btn-sm" onclick="revokeCode('${c.code}')">Revoke</button>` : ''}
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Filter Tabs handling
+    filterTabs.addEventListener('click', (e) => {
+      const tab = e.target.closest('.filter-tab');
+      if (!tab) return;
+
+      document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+
+      currentFilter = tab.dataset.filter;
+      renderTable();
+    });
+
+    // Generate Code
+    btnGenerate.addEventListener('click', async () => {
+      btnGenerate.disabled = true;
+      const note = noteInput.value.trim();
+
+      try {
+        const res = await fetch(`/api/admin/codes/generate?note=${encodeURIComponent(note)}`, { method: 'POST' });
+        if (!res.ok) throw new Error('Generation failed');
+        const data = await res.json();
+
+        newCodeValue.textContent = data.code;
+        newCodeMeta.textContent = `Status: UNUSED. Note: ${data.note || 'None'}. Ready to be shared.`;
+        generatedBox.classList.remove('hidden');
+
+        noteInput.value = '';
+        btnCopy.textContent = 'Copy Code';
+
+        loadCodes();
+      } catch (err) {
+        alert('Failed to generate code: ' + err.message);
+      } finally {
+        btnGenerate.disabled = false;
+      }
+    });
+
+    // Copy Code button
+    btnCopy.addEventListener('click', () => {
+      const code = newCodeValue.textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        btnCopy.textContent = 'Copied!';
+        setTimeout(() => { btnCopy.textContent = 'Copy Code'; }, 2000);
+      });
+    });
+
+    window.copyText = function(text, btn) {
+      navigator.clipboard.writeText(text).then(() => {
+        const orig = btn.textContent;
+        btn.textContent = 'Copied';
+        setTimeout(() => { btn.textContent = orig; }, 1500);
+      });
+    };
+
+    window.revokeCode = async function(code) {
+      if (!confirm(`Are you sure you want to revoke access code ${code}?`)) return;
+
+      try {
+        const formData = new FormData();
+        formData.append('code', code);
+        const res = await fetch('/api/admin/codes/revoke', { method: 'POST', body: formData });
+        if (!res.ok) throw new Error('Revoke failed');
+        loadCodes();
+      } catch (err) {
+        alert('Failed to revoke code: ' + err.message);
+      }
+    };
+
+    searchFilter.addEventListener('input', renderTable);
+
+    // Setup Real-Time WebSocket Updates
+    function connectAdminUpdates() {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${protocol}//${window.location.host}/ws/admin/updates`;
+      const ws = new WebSocket(wsUrl);
+
+      ws.onopen = () => {
+        syncText.textContent = 'Live Sync Active';
+      };
+
+      ws.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.type === 'codes_updated') {
+          // Instant reload as soon as any job redeems a code or admin creates/revokes
+          loadCodes();
+        }
+      };
+
+      ws.onclose = () => {
+        syncText.textContent = 'Reconnecting...';
+        setTimeout(connectAdminUpdates, 2000);
+      };
+
+      ws.onerror = () => {
+        ws.close();
+      };
+    }
+
+    // Initial Load & Polling Fallback (every 3s)
+    loadCodes();
+    connectAdminUpdates();
+    setInterval(loadCodes, 3000);
+  </script>
+</body>
+</html>

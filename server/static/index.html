@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Containerized Python Executor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090c10;
+      --surface: #0d1117;
+      --surface-raised: #161b22;
+      --border: #21262d;
+      --border-focus: #388bfd;
+      --text-main: #c9d1d9;
+      --text-bright: #f0f6fc;
+      --text-muted: #8b949e;
+      --accent: #238636;
+      --accent-hover: #2ea043;
+      --danger: #f85149;
+      --warning: #d29922;
+      --terminal-bg: #040608;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    header {
+      background-color: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text-bright);
+      letter-spacing: -0.01em;
+    }
+
+    .brand-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.15rem;
+    }
+
+    main {
+      flex: 1;
+      max-width: 1380px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.75rem 2rem;
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 900px) {
+      main {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+      }
+    }
+
+    .card {
+      background-color: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.75rem;
+    }
+
+    .card-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-bright);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .form-label {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-bright);
+    }
+
+    .input-text {
+      background-color: var(--surface-raised);
+      border: 1px solid var(--border);
+      color: var(--text-bright);
+      font-family: 'Fira Code', monospace;
+      font-size: 0.85rem;
+      padding: 0.65rem 0.85rem;
+      border-radius: 6px;
+      outline: none;
+      transition: border-color 0.15s ease;
+      text-transform: uppercase;
+    }
+
+    .input-text:focus {
+      border-color: var(--border-focus);
+    }
+
+    .input-help {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .dropzone {
+      border: 1px dashed var(--border);
+      border-radius: 6px;
+      padding: 2rem 1.25rem;
+      text-align: center;
+      cursor: pointer;
+      background: var(--surface-raised);
+      transition: border-color 0.15s ease, background-color 0.15s ease;
+    }
+
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--border-focus);
+      background-color: rgba(56, 139, 253, 0.04);
+    }
+
+    .dropzone-label {
+      font-size: 0.875rem;
+      color: var(--text-bright);
+      font-weight: 500;
+      margin-bottom: 0.35rem;
+    }
+
+    .dropzone-help {
+      font-size: 0.775rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .file-selected {
+      background: var(--surface-raised);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.825rem;
+    }
+
+    .file-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+      overflow: hidden;
+    }
+
+    .file-name {
+      color: var(--text-bright);
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .file-size {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+    }
+
+    .btn-remove {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.8rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+    }
+
+    .btn-remove:hover {
+      color: var(--danger);
+      background: rgba(248, 81, 73, 0.1);
+    }
+
+    .btn {
+      font-family: inherit;
+      font-size: 0.875rem;
+      font-weight: 500;
+      padding: 0.65rem 1rem;
+      border-radius: 6px;
+      border: 1px solid rgba(240, 246, 252, 0.1);
+      cursor: pointer;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      width: 100%;
+    }
+
+    .btn-primary {
+      background-color: var(--accent);
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--accent-hover);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background-color: var(--surface-raised);
+      color: var(--text-bright);
+      border-color: var(--border);
+    }
+
+    .btn-secondary:hover {
+      background-color: #21262d;
+      border-color: #8b949e;
+    }
+
+    .terminal-wrapper {
+      background: var(--terminal-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 480px;
+      overflow: hidden;
+    }
+
+    .terminal-bar {
+      background: var(--surface-raised);
+      border-bottom: 1px solid var(--border);
+      padding: 0.5rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .terminal-view {
+      flex: 1;
+      padding: 1rem;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.8125rem;
+      line-height: 1.55;
+      color: var(--text-main);
+      overflow-y: auto;
+      max-height: 540px;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .status-badge {
+      font-size: 0.72rem;
+      font-weight: 500;
+      padding: 0.2rem 0.55rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .status-idle {
+      background: #21262d;
+      color: var(--text-muted);
+    }
+
+    .status-running {
+      background: rgba(56, 139, 253, 0.15);
+      color: #58a6ff;
+      border: 1px solid rgba(56, 139, 253, 0.3);
+    }
+
+    .status-busy {
+      background: rgba(210, 153, 34, 0.15);
+      color: #d29922;
+      border: 1px solid rgba(210, 153, 34, 0.3);
+    }
+
+    .status-completed {
+      background: rgba(35, 134, 54, 0.15);
+      color: #3fb950;
+      border: 1px solid rgba(35, 134, 54, 0.3);
+    }
+
+    .status-failed {
+      background: rgba(248, 81, 73, 0.15);
+      color: #f85149;
+      border: 1px solid rgba(248, 81, 73, 0.3);
+    }
+
+    .results-panel {
+      background: var(--surface-raised);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .results-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-bright);
+    }
+
+    .results-desc {
+      font-size: 0.775rem;
+      color: var(--text-muted);
+      margin-top: 0.15rem;
+    }
+
+    .download-link {
+      width: auto;
+      padding: 0.55rem 1.15rem;
+      font-size: 0.8125rem;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <div class="brand-title">Containerized Python Executor</div>
+      <div class="brand-subtitle">Isolated Docker runtime with real-time log streaming</div>
+    </div>
+    <a href="/admin" class="btn btn-secondary" style="width: auto; padding: 0.4rem 0.85rem; font-size: 0.8rem;">Admin Portal</a>
+  </header>
+
+  <main>
+    <!-- Left Column: Upload -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Job Submission</span>
+        <span style="font-size: 0.75rem; color: var(--text-muted);">ZIP Archive</span>
+      </div>
+
+      <div class="form-group">
+        <label for="codeInput" class="form-label">One-Time Access Code</label>
+        <input type="text" id="codeInput" class="input-text" placeholder="ACC-XXXX-XXXX" maxlength="16">
+        <span class="input-help" id="codeHelp">Single-use code provided by admin</span>
+      </div>
+
+      <div class="dropzone" id="dropzone">
+        <div class="dropzone-label">Select or drop ZIP file</div>
+        <div class="dropzone-help">Archive must include run.sh at root.<br>Optional: requirements.txt</div>
+        <input type="file" id="fileInput" accept=".zip" style="display: none;">
+      </div>
+
+      <div id="fileSelected" class="file-selected hidden">
+        <div class="file-info">
+          <span id="fileName" class="file-name">job.zip</span>
+          <span id="fileSize" class="file-size">0 KB</span>
+        </div>
+        <button id="clearFile" class="btn-remove" title="Remove file">Remove</button>
+      </div>
+
+      <button id="btnExecute" class="btn btn-primary" disabled>
+        Execute Job
+      </button>
+    </div>
+
+    <!-- Right Column: Terminal & Logs -->
+    <div class="card" style="flex: 1;">
+      <div class="card-header">
+        <span class="card-title">Execution Console</span>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+          <span id="statusBadge" class="status-badge status-idle">IDLE</span>
+          <span id="timer" style="font-family: 'Fira Code', monospace; font-size: 0.775rem; color: var(--text-muted);">0.0s</span>
+        </div>
+      </div>
+
+      <div class="terminal-wrapper">
+        <div class="terminal-bar">
+          <span id="activeJobId">No active job</span>
+          <span id="connectionStatus">Disconnected</span>
+        </div>
+        <div class="terminal-view" id="terminal">Ready. Enter your one-time access code and select a ZIP archive to begin container execution.</div>
+      </div>
+
+      <!-- Output Results Panel -->
+      <div id="resultsCard" class="results-panel hidden">
+        <div>
+          <div class="results-title" id="resultsTitle">Execution Complete</div>
+          <div class="results-desc" id="resultsSummary">Workspace artifacts and logs captured.</div>
+        </div>
+        <a id="downloadLink" href="#" class="btn btn-secondary download-link">
+          Download Output (.zip)
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const codeInput = document.getElementById('codeInput');
+    const codeHelp = document.getElementById('codeHelp');
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const fileSelected = document.getElementById('fileSelected');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+    const clearFile = document.getElementById('clearFile');
+    const btnExecute = document.getElementById('btnExecute');
+    const terminal = document.getElementById('terminal');
+    const statusBadge = document.getElementById('statusBadge');
+    const timerElem = document.getElementById('timer');
+    const activeJobId = document.getElementById('activeJobId');
+    const connectionStatus = document.getElementById('connectionStatus');
+    const resultsCard = document.getElementById('resultsCard');
+    const resultsTitle = document.getElementById('resultsTitle');
+    const resultsSummary = document.getElementById('resultsSummary');
+    const downloadLink = document.getElementById('downloadLink');
+
+    let currentFile = null;
+    let timerInterval = null;
+    let startTime = null;
+
+    codeInput.addEventListener('input', () => {
+      codeInput.value = codeInput.value.toUpperCase();
+      checkCanExecute();
+    });
+
+    dropzone.addEventListener('click', () => fileInput.click());
+    dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+      if (e.dataTransfer.files.length) {
+        selectFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length) {
+        selectFile(fileInput.files[0]);
+      }
+    });
+
+    clearFile.addEventListener('click', () => {
+      currentFile = null;
+      fileInput.value = '';
+      fileSelected.classList.add('hidden');
+      dropzone.classList.remove('hidden');
+      checkCanExecute();
+    });
+
+    function selectFile(file) {
+      if (!file.name.endsWith('.zip')) {
+        alert('Please select a valid .zip archive.');
+        return;
+      }
+      currentFile = file;
+      fileName.textContent = file.name;
+      fileSize.textContent = `${(file.size / 1024).toFixed(1)} KB`;
+      dropzone.classList.add('hidden');
+      fileSelected.classList.remove('hidden');
+      checkCanExecute();
+    }
+
+    function checkCanExecute() {
+      const hasCode = codeInput.value.trim().length > 0;
+      const hasFile = currentFile !== null;
+      btnExecute.disabled = !(hasCode && hasFile);
+    }
+
+    btnExecute.addEventListener('click', async () => {
+      const code = codeInput.value.trim();
+      if (!code) {
+        alert('Please enter your one-time access code.');
+        return;
+      }
+      if (!currentFile) return;
+
+      btnExecute.disabled = true;
+      resultsCard.classList.add('hidden');
+      terminal.textContent = '';
+      setStatus('PREPARING', 'status-running');
+
+      const formData = new FormData();
+      formData.append('file', currentFile);
+      formData.append('code', code);
+
+      try {
+        logLine('[System] Uploading archive and validating access code...');
+        const res = await fetch('/api/jobs', { method: 'POST', body: formData });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || 'Authorization failed');
+        }
+
+        const data = await res.json();
+        const jobId = data.job_id;
+        activeJobId.textContent = jobId;
+        logLine(`[System] Job created: ${jobId}`);
+        logLine(`[System] Access code ${code} validated. Starting container...`);
+
+        startTimer();
+        connectWebSocket(jobId);
+      } catch (err) {
+        logLine(`[System Error] ${err.message}`);
+        setStatus('FAILED', 'status-failed');
+        btnExecute.disabled = false;
+      }
+    });
+
+    function connectWebSocket(jobId) {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${protocol}//${window.location.host}/ws/jobs/${jobId}/execute`;
+      const ws = new WebSocket(wsUrl);
+
+      connectionStatus.textContent = 'Streaming';
+      setStatus('RUNNING', 'status-running');
+
+      ws.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.type === 'busy') {
+          setStatus(`QUEUED (#${msg.position})`, 'status-busy');
+          logLine(`[Server Busy] ${msg.message}`);
+        } else if (msg.type === 'slot_acquired') {
+          setStatus('RUNNING', 'status-running');
+          logLine(`[Server] ${msg.message}`);
+        } else if (msg.type === 'log') {
+          logLine(msg.line);
+        } else if (msg.type === 'finish') {
+          stopTimer();
+          connectionStatus.textContent = 'Closed';
+          if (msg.status === 'completed') {
+            setStatus('COMPLETED', 'status-completed');
+            resultsTitle.textContent = 'Execution Succeeded';
+            resultsSummary.textContent = `Duration: ${msg.duration_seconds}s. Output files: ${msg.generated_files.length}. Access code consumed.`;
+          } else {
+            setStatus('FAILED', 'status-failed');
+            resultsTitle.textContent = 'Execution Failed';
+            resultsSummary.textContent = `Exit code ${msg.exit_code}. Duration: ${msg.duration_seconds}s. Access code consumed.`;
+          }
+          downloadLink.href = `/api/jobs/${jobId}/download`;
+          resultsCard.classList.remove('hidden');
+          // Clear used code from input
+          codeInput.value = '';
+          btnExecute.disabled = true;
+        } else if (msg.type === 'error') {
+          stopTimer();
+          connectionStatus.textContent = 'Error';
+          logLine(`\n[Error] ${msg.message}`);
+          setStatus('FAILED', 'status-failed');
+          btnExecute.disabled = false;
+        }
+      };
+
+      ws.onerror = () => {
+        stopTimer();
+        connectionStatus.textContent = 'Connection Error';
+        logLine('\n[Error] WebSocket connection failed.');
+        setStatus('FAILED', 'status-failed');
+        btnExecute.disabled = false;
+      };
+
+      ws.onclose = () => {
+        if (connectionStatus.textContent !== 'Error') {
+          connectionStatus.textContent = 'Closed';
+        }
+      };
+    }
+
+    function logLine(text) {
+      terminal.textContent += text + '\n';
+      terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    function setStatus(text, className) {
+      statusBadge.textContent = text;
+      statusBadge.className = `status-badge ${className}`;
+    }
+
+    function startTimer() {
+      startTime = Date.now();
+      timerInterval = setInterval(() => {
+        const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+        timerElem.textContent = `${elapsed}s`;
+      }, 100);
+    }
+
+    function stopTimer() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+    }
+  </script>
+</body>
+</html>

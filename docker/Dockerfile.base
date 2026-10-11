@@ -1,0 +1,10 @@
+FROM python:3.11-slim
+
+# Disable python stdout buffering so logs stream immediately
+ENV PYTHONUNBUFFERED=1
+
+# Working directory inside container
+WORKDIR /workspace
+
+# Pre-install base libraries (numpy, pandas)
+RUN pip install --no-cache-dir numpy pandas
